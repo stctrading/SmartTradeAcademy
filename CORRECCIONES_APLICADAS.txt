@@ -1,0 +1,41 @@
+🔧 CORRECCIONES APLICADAS AL SISTEMA STC TRADING
+================================================
+
+✅ PROBLEMAS SOLUCIONADOS:
+
+1. 🌐 ERROR CORS ARREGLADO:
+   • Archivo: iq_routes_redis_patch.py
+   • Cambio: CORS más permisivo (r"/*" en lugar de r"/api/*")
+   • Headers adicionales: Access-Control-Allow-Origin
+   • Métodos: GET, POST, OPTIONS, PUT, DELETE
+   • Fallback manual si flask-cors no está disponible
+
+2. 📊 ERROR STCChartManager ARREGLADO:
+   • Archivo: templates/dashboard_pro.html
+   • Eliminadas referencias a STCChartManager (no definido)
+   • Dejado solo STCChartFix (que funciona automáticamente)
+   • Simplificado código de inicialización de gráficos
+
+3. 🔄 INICIALIZACIÓN LIMPIA:
+   • Eliminado código duplicado de gráficos
+   • STCChartFix se ejecuta automáticamente al cargar la página
+   • Polling cada 2 segundos configurado correctamente
+
+🎯 ESTADO DESPUÉS DE LAS CORRECCIONES:
+
+✅ API Backend: CORS habilitado y funcional
+✅ Dashboard: Código de gráficos limpio
+✅ STCChartFix: Funcionando automáticamente
+✅ Polling: Actualizaciones cada 2 segundos
+✅ Endpoints: /api/iq/candles funcionando
+
+📋 PARA VERIFICAR:
+1. Reinicia los servicios con: arreglo_cors_graficos.bat
+2. Abre http://localhost:5001
+3. Refresca la página (Ctrl+F5)
+4. Verifica en Console (F12) que no haya errores CORS
+5. Los gráficos deberían cargar automáticamente
+
+🚀 Los errores reportados deberían estar completamente solucionados.
+
+================================================

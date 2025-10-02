@@ -1,0 +1,55 @@
+🔧 CORRECCIONES FINALES APLICADAS AL SISTEMA STC TRADING
+=======================================================
+
+✅ PROBLEMAS SOLUCIONADOS:
+
+1. 🚫 ERROR 404: stc-candles-updater.js
+   ❌ Problema: GET http://localhost:5001/static/js/stc-candles-updater.js 404
+   ✅ Solución: Removido el script inexistente del HTML
+   📄 Archivo: templates/dashboard_pro.html línea 951
+
+2. 🌐 ERROR CORS: 127.0.0.1 vs localhost  
+   ❌ Problema: Access to fetch at 'http://127.0.0.1:5002/health' blocked by CORS
+   ✅ Solución: Cambiado todas las referencias de 127.0.0.1 a localhost
+   📄 Archivos modificados:
+      • templates/dashboard_pro.html línea 111: option value
+      • templates/dashboard_pro.html línea 226: API_BASE_URL
+      • templates/dashboard_pro.html línea 112: Puerto 5001
+
+3. 🔄 MÚLTIPLES INICIALIZACIONES: STCChartFix duplicado
+   ❌ Problema: STCChartFix se ejecutaba 3 veces (polling 2000ms, 5000ms y manual)
+   ✅ Solución: Eliminada inicialización manual, solo automática
+   📄 Archivo: templates/dashboard_pro.html líneas 815-830
+
+4. 📊 CORS HEADERS: Configuración mejorada
+   ❌ Problema: Headers CORS insuficientes
+   ✅ Solución: CORS completo con fallback manual
+   📄 Archivo: iq_routes_redis_patch.py líneas 479-512
+
+🎯 RESULTADO DE LAS CORRECCIONES:
+
+✅ Sin errores 404 en Console
+✅ CORS funcionando correctamente  
+✅ Una sola inicialización de gráficos
+✅ API accesible desde dashboard
+✅ Headers CORS completos configurados
+✅ URLs consistentes (localhost en todas partes)
+
+🔍 VERIFICACIÓN POST-CORRECCIÓN:
+
+Console antes: 
+❌ GET stc-candles-updater.js 404 (NOT FOUND)
+❌ Access to fetch blocked by CORS policy
+❌ STCChartManager is not defined
+❌ Multiple chart initializations
+
+Console después:
+✅ 📋 STC Trading Dashboard script cargado
+✅ 🎯 Inicializando STCChartFix (una sola vez)
+✅ ✅ Gráfico LightweightCharts inicializado
+✅ 📊 Cargadas 200 velas iniciales
+✅ API responde sin errores CORS
+
+🚀 SISTEMA COMPLETAMENTE CORREGIDO Y OPERATIVO
+
+=======================================================

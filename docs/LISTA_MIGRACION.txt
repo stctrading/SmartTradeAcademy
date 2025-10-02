@@ -1,0 +1,135 @@
+📦 LISTA DE ARCHIVOS PARA MIGRACIÓN - SISTEMA STC TRADING
+================================================================
+
+🎯 OBJETIVO: Migrar sistema completo IQ Option Trading a nueva máquina
+
+📋 ARCHIVOS ESENCIALES (OBLIGATORIOS):
+=====================================
+✅ iq_routes_redis_patch.py          - Backend API Flask (Puerto 5002)
+✅ iq_client.py                      - Cliente IQ Option (Conexión real)  
+✅ mt5_server.py                     - Servidor Dashboard (Puerto 5001)
+✅ templates/dashboard.html          - Dashboard web principal
+✅ .env                              - Variables de entorno (CONFIGURAR)
+✅ requirements.txt                  - Dependencias Python
+✅ docker-compose.yml                - Redis Docker container
+
+📦 ARCHIVOS DE UTILIDAD (RECOMENDADOS):
+=======================================
+✅ start_iq_system_complete.bat      - Script arranque automático
+✅ test_symbols.py                   - Test endpoint símbolos
+✅ test_complete_system.py           - Test sistema completo
+✅ verify_complete_setup.py          - Verificador instalación
+✅ README.md                         - Documentación principal
+✅ SISTEMA_IQ_COMPLETO.md           - Docs técnicas completas
+✅ GUIA_MIGRACION.html              - Guía visual migración
+✅ migrate_system.py                 - Script migración automática
+
+📚 DOCUMENTACIÓN Y EXTRAS:
+==========================
+📄 INSTRUCCIONES_EJECUCION.md       - Manual de uso
+📄 migration_manifest.json          - Lista completa archivos
+📄 post_migration_setup.py          - Config post-migración
+
+🗂️ DIRECTORIOS COMPLETOS:
+=========================
+📁 templates/                       - Plantillas HTML
+📁 public/                          - Archivos estáticos (si existe)
+
+⚙️ DEPENDENCIAS DEL SISTEMA:
+============================
+🐍 Python 3.11+
+📦 Flask 2.3.3
+🗄️ Redis 7+
+🔌 iqoptionapi 5.0.0
+🌐 httpx, requests, flask-cors
+🐳 Docker (opcional para Redis)
+
+🌐 PUERTOS UTILIZADOS:
+======================
+🔸 5001 - Dashboard Web
+🔸 5002 - API Backend  
+🔸 6380 - Redis Server
+🔸 8081 - Redis Commander (opcional)
+
+💻 VARIABLES DE ENTORNO CRÍTICAS:
+=================================
+IQ_EMAIL=tu_email@gmail.com         ⚠️ CONFIGURAR
+IQ_PASSWORD=tu_password              ⚠️ CONFIGURAR  
+IQ_BALANCE_TYPE=PRACTICE
+SERVER_BASE=http://127.0.0.1:5002
+REDIS_URL=redis://127.0.0.1:6380/0
+
+🚀 PASOS DE MIGRACIÓN:
+=====================
+1. 📁 Copiar archivos esenciales a nueva máquina
+2. 🐍 Crear entorno virtual Python 3.11+
+3. 📦 pip install -r requirements.txt
+4. 🗄️ Iniciar Redis (docker-compose up -d)
+5. ⚙️ Configurar credenciales en .env
+6. 🧪 python verify_complete_setup.py
+7. 🚀 start_iq_system_complete.bat
+8. 🌐 Abrir http://localhost:5001
+
+🔧 COMANDOS DE INSTALACIÓN:
+==========================
+# Crear entorno virtual
+python -m venv .venv311
+
+# Activar entorno (Windows)
+.venv311\Scripts\activate
+
+# Activar entorno (Linux/Mac) 
+source .venv311/bin/activate
+
+# Instalar dependencias
+pip install -r requirements.txt
+
+# Iniciar Redis
+docker-compose up -d
+
+# Verificar instalación
+python verify_complete_setup.py
+
+# Iniciar sistema
+start_iq_system_complete.bat
+
+🎯 URLS DE ACCESO:
+=================
+Dashboard: http://localhost:5001
+API Health: http://localhost:5002/health  
+API Símbolos: http://localhost:5002/api/iq/symbols
+Redis UI: http://localhost:8081 (opcional)
+
+⚠️ NOTAS IMPORTANTES:
+====================
+- El sistema SOLO usa datos reales de IQ Option (no mock)
+- Sesión persistente: login se mantiene al recargar página
+- Selector dinámico: solo símbolos realmente disponibles
+- Sin datos hardcodeados: si IQ no responde, no hay símbolos
+- Credenciales reales: configurar IQ_EMAIL e IQ_PASSWORD correctos
+
+🔍 VERIFICACIÓN POST-INSTALACIÓN:
+=================================
+✅ Redis responde: redis-cli -p 6380 ping
+✅ API responde: curl http://localhost:5002/health
+✅ Dashboard carga: curl http://localhost:5001  
+✅ Test símbolos: python test_symbols.py
+✅ Test completo: python test_complete_system.py
+
+📋 RESUMEN ARQUITECTURA:
+=======================
+Dashboard (5001) → API (5002) → Redis (6380) → Cliente IQ → IQ Option API
+
+🎉 SISTEMA COMPLETAMENTE FUNCIONAL:
+===================================
+- ✅ Solo símbolos reales de IQ Option
+- ✅ Sesión persistente con login/logout  
+- ✅ Dashboard responsive y moderno
+- ✅ Reconexión automática ante errores
+- ✅ Cache Redis para performance
+- ✅ Scripts de testing incluidos
+- ✅ Documentación completa
+
+================================================================
+Para migración automática ejecutar: python migrate_system.py
+================================================================
