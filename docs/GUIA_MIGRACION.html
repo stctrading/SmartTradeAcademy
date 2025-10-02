@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Guía de Migración - Sistema IQ Option Trading</title>
+    <style>
+        :root {
+            --bg: #0f1419;
+            --panel: #1e2328;
+            --text: #e6e8ea;
+            --accent: #00d4aa;
+            --warning: #ffb86c;
+            --error: #ff5555;
+            --success: #50fa7b;
+            --muted: #6272a4;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            background: var(--panel);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 212, 170, 0.1);
+        }
+        
+        .header h1 {
+            color: var(--accent);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: var(--muted);
+            font-size: 1.1rem;
+        }
+        
+        .section {
+            background: var(--panel);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .section h2 {
+            color: var(--accent);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section h2::before {
+            content: "📁";
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .file-item {
+            background: var(--bg);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        
+        .file-item h4 {
+            color: var(--success);
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+        
+        .file-item p {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        
+        .code-block {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        
+        .code-block pre {
+            color: var(--text);
+            font-family: 'Consolas', 'Monaco', monospace;
+            white-space: pre-wrap;
+        }
+        
+        .requirements {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .requirement-item {
+            background: var(--bg);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--warning);
+        }
+        
+        .requirement-item h5 {
+            color: var(--warning);
+            margin-bottom: 8px;
+        }
+        
+        .ports-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--bg);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .ports-table th,
+        .ports-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        
+        .ports-table th {
+            background: #2c3e50;
+            color: var(--accent);
+            font-weight: 600;
+        }
+        
+        .ports-table tr:hover {
+            background: rgba(0, 212, 170, 0.05);
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status.required { background: var(--error); color: white; }
+        .status.optional { background: var(--warning); color: black; }
+        .status.recommended { background: var(--success); color: white; }
+        
+        .warning-box {
+            background: linear-gradient(135deg, var(--warning), #e67e22);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, var(--success), #2ecc71);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .step {
+            background: var(--bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid var(--success);
+        }
+        
+        .step h4 {
+            color: var(--success);
+            margin-bottom: 10px;
+        }
+        
+        .architecture {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: var(--bg);
+            border-radius: 12px;
+            border: 2px dashed var(--accent);
+        }
+        
+        .component {
+            background: var(--panel);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 0 10px;
+            text-align: center;
+            border: 2px solid var(--accent);
+            min-width: 120px;
+        }
+        
+        .component h5 {
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+        
+        .arrow {
+            color: var(--accent);
+            font-size: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .architecture {
+                flex-direction: column;
+            }
+            
+            .arrow {
+                transform: rotate(90deg);
+                margin: 10px 0;
+            }
+            
+            .file-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Guía de Migración</h1>
+            <p>Sistema Completo IQ Option Trading - STC Bot</p>
+        </div>
+
+        <div class="section">
+            <h2>📋 Descripción del Proyecto</h2>
+            <p><strong>Sistema de Trading Automatizado IQ Option</strong> - Una plataforma completa que integra:</p>
+            <ul style="margin: 15px 0; padding-left: 30px;">
+                <li>🔌 <strong>Cliente IQ Option</strong> - Conexión real con la API de IQ Option</li>
+                <li>🌐 <strong>Backend API Flask</strong> - Manejo de órdenes, sesiones y datos</li>
+                <li>📊 <strong>Dashboard Web</strong> - Interfaz de usuario para trading</li>
+                <li>🗄️ <strong>Sistema Redis</strong> - Cache y cola de mensajes</li>
+                <li>⚡ <strong>Sesión Persistente</strong> - Login/logout automático</li>
+                <li>📈 <strong>Datos Reales</strong> - Solo símbolos y velas de IQ Option</li>
+            </ul>
+            
+            <div class="architecture">
+                <div class="component">
+                    <h5>Dashboard</h5>
+                    <p>Puerto 5001</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="component">
+                    <h5>API Backend</h5>
+                    <p>Puerto 5002</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="component">
+                    <h5>Redis</h5>
+                    <p>Puerto 6380</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="component">
+                    <h5>IQ Client</h5>
+                    <p>IQ Option API</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📦 Archivos Esenciales para Migrar</h2>
+            
+            <div class="file-grid">
+                <div class="file-item">
+                    <h4>🔧 Backend Core</h4>
+                    <p><code>iq_routes_redis_patch.py</code> - API principal Flask<br>
+                    <code>iq_client.py</code> - Cliente IQ Option<br>
+                    <code>mt5_server.py</code> - Servidor del dashboard</p>
+                </div>
+                
+                <div class="file-item">
+                    <h4>🌐 Frontend</h4>
+                    <p><code>templates/dashboard.html</code> - Dashboard principal<br>
+                    <code>public/</code> - Archivos estáticos<br>
+                    <code>templates/</code> - Plantillas HTML</p>
+                </div>
+                
+                <div class="file-item">
+                    <h4>⚙️ Configuración</h4>
+                    <p><code>.env</code> - Variables de entorno<br>
+                    <code>docker-compose.yml</code> - Redis Docker<br>
+                    <code>start_iq_system_complete.bat</code> - Script de inicio</p>
+                </div>
+                
+                <div class="file-item">
+                    <h4>🧪 Testing</h4>
+                    <p><code>test_symbols.py</code> - Test símbolos<br>
+                    <code>test_complete_system.py</code> - Test completo<br>
+                    <code>verify_complete_setup.py</code> - Verificación</p>
+                </div>
+                
+                <div class="file-item">
+                    <h4>📚 Documentación</h4>
+                    <p><code>SISTEMA_IQ_COMPLETO.md</code> - Docs técnicas<br>
+                    <code>INSTRUCCIONES_EJECUCION.md</code> - Manual de uso<br>
+                    <code>README.md</code> - Descripción general</p>
+                </div>
+                
+                <div class="file-item">
+                    <h4>🏗️ Trading</h4>
+                    <p><code>STC_Trading_EA.mq5</code> - Expert Advisor MT5<br>
+                    <code>signals_service_redis.py</code> - Servicio de señales<br>
+                    <code>signal_analyzer.py</code> - Análisis de señales</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💻 Dependencias y Paquetes</h2>
+            
+            <div class="requirements">
+                <div class="requirement-item">
+                    <h5>🐍 Python</h5>
+                    <p>Versión: 3.11+<br>
+                    Entorno virtual recomendado</p>
+                </div>
+                
+                <div class="requirement-item">
+                    <h5>📦 Paquetes Python</h5>
+                    <p>Flask, Redis, Requests<br>
+                    iqoptionapi, python-dotenv<br>
+                    httpx, flask-cors</p>
+                </div>
+                
+                <div class="requirement-item">
+                    <h5>🗄️ Redis Server</h5>
+                    <p>Redis 7+ (Docker recomendado)<br>
+                    Puerto: 6380<br>
+                    Persistencia activada</p>
+                </div>
+                
+                <div class="requirement-item">
+                    <h5>🐳 Docker (Opcional)</h5>
+                    <p>Docker Desktop<br>
+                    docker-compose<br>
+                    Para Redis automático</p>
+                </div>
+            </div>
+            
+            <div class="code-block">
+                <h4>📋 requirements.txt</h4>
+                <pre>
+# Framework Web
+Flask==2.3.3
+flask-cors==4.0.0
+
+# Base de datos y cache  
+redis==5.0.1
+
+# HTTP y requests
+httpx==0.25.0
+requests==2.31.0
+
+# IQ Option API
+iqoptionapi==5.0.0
+
+# Utilidades
+python-dotenv==1.0.0
+websocket-client==1.6.4
+
+# Opcional - Para análisis avanzado
+pandas==2.1.1
+numpy==1.24.3
+</pre>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🌐 Puertos y Servicios</h2>
+            
+            <table class="ports-table">
+                <thead>
+                    <tr>
+                        <th>Servicio</th>
+                        <th>Puerto</th>
+                        <th>Protocolo</th>
+                        <th>Estado</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Dashboard Web</strong></td>
+                        <td>5001</td>
+                        <td>HTTP</td>
+                        <td><span class="status required">REQUERIDO</span></td>
+                        <td>Interfaz de usuario principal</td>
+                    </tr>
+                    <tr>
+                        <td><strong>API Backend</strong></td>
+                        <td>5002</td>
+                        <td>HTTP</td>
+                        <td><span class="status required">REQUERIDO</span></td>
+                        <td>API Flask - Endpoints IQ Option</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Redis Server</strong></td>
+                        <td>6380</td>
+                        <td>TCP</td>
+                        <td><span class="status required">REQUERIDO</span></td>
+                        <td>Cache y cola de mensajes</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Redis Commander</strong></td>
+                        <td>8081</td>
+                        <td>HTTP</td>
+                        <td><span class="status optional">OPCIONAL</span></td>
+                        <td>Interfaz web para Redis</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MT5 Terminal</strong></td>
+                        <td>Dinámico</td>
+                        <td>TCP</td>
+                        <td><span class="status recommended">RECOMENDADO</span></td>
+                        <td>MetaTrader 5 (si se usa)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>🔧 Variables de Entorno (.env)</h2>
+            
+            <div class="code-block">
+                <pre>
+# Configuración del servidor
+SERVER_BASE=http://127.0.0.1:5002
+
+# Credenciales IQ Option
+IQ_EMAIL=tu_email@gmail.com
+IQ_PASSWORD=tu_password
+IQ_BALANCE_TYPE=PRACTICE
+
+# Símbolos y configuración
+IQ_SYMBOLS=EURUSD-OTC
+IQ_TIMEFRAMES=M5
+IQ_PUSH_INTERVAL_SEC=1.0
+
+# Timeouts y logging
+HTTP_TIMEOUT=4.0
+LOG_LEVEL=INFO
+
+# Redis (Opcional - tiene defaults)
+REDIS_URL=redis://127.0.0.1:6380/0
+                </pre>
+            </div>
+            
+            <div class="warning-box">
+                ⚠️ <strong>IMPORTANTE:</strong> Cambia IQ_EMAIL e IQ_PASSWORD por tus credenciales reales de IQ Option
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🚀 Pasos de Instalación</h2>
+            
+            <div class="step">
+                <h4>1. 📁 Crear estructura de directorios</h4>
+                <div class="code-block">
+                    <pre>
+mkdir STC_Trading_System
+cd STC_Trading_System
+
+# Copiar archivos esenciales:
+# - iq_routes_redis_patch.py
+# - iq_client.py  
+# - mt5_server.py
+# - templates/dashboard.html
+# - .env (configurar credenciales)
+# - start_iq_system_complete.bat
+                    </pre>
+                </div>
+            </div>
+            
+            <div class="step">
+                <h4>2. 🐍 Configurar Python</h4>
+                <div class="code-block">
+                    <pre>
+# Crear entorno virtual
+python -m venv .venv311
+
+# Activar entorno (Windows)
+.venv311\Scripts\activate
+
+# Activar entorno (Linux/Mac)
+source .venv311/bin/activate
+
+# Instalar dependencias
+pip install -r requirements.txt
+                    </pre>
+                </div>
+            </div>
+            
+            <div class="step">
+                <h4>3. 🗄️ Configurar Redis</h4>
+                <div class="code-block">
+                    <pre>
+# Opción A: Docker (Recomendado)
+docker-compose up -d
+
+# Opción B: Redis nativo
+# Descargar Redis para Windows/Linux
+# Configurar puerto 6380
+
+# Verificar Redis
+redis-cli -p 6380 ping
+                    </pre>
+                </div>
+            </div>
+            
+            <div class="step">
+                <h4>4. ⚙️ Configurar credenciales</h4>
+                <div class="code-block">
+                    <pre>
+# Editar archivo .env
+IQ_EMAIL=tu_email_real@gmail.com
+IQ_PASSWORD=tu_password_real
+IQ_BALANCE_TYPE=PRACTICE  # o REAL
+
+# Verificar configuración
+python -c "from dotenv import load_dotenv; load_dotenv(); print('Config OK')"
+                    </pre>
+                </div>
+            </div>
+            
+            <div class="step">
+                <h4>5. 🚀 Iniciar sistema</h4>
+                <div class="code-block">
+                    <pre>
+# Windows
+start_iq_system_complete.bat
+
+# Linux/Mac  
+chmod +x start_iq_system_complete.sh
+./start_iq_system_complete.sh
+
+# Manual (alternativa)
+python iq_routes_redis_patch.py &
+python iq_client.py &
+python mt5_server.py &
+                    </pre>
+                </div>
+            </div>
+            
+            <div class="step">
+                <h4>6. 🧪 Verificar instalación</h4>
+                <div class="code-block">
+                    <pre>
+# Test básico
+python test_symbols.py
+
+# Test completo
+python test_complete_system.py
+
+# Verificar servicios
+curl http://localhost:5001  # Dashboard
+curl http://localhost:5002/api/iq/symbols  # API
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📁 Estructura de Directorios Completa</h2>
+            
+            <div class="code-block">
+                <pre>
+STC_Trading_System/
+├── 📁 .venv311/                    # Entorno virtual Python
+├── 📁 templates/                   # Plantillas HTML
+│   └── dashboard.html              # Dashboard principal
+├── 📁 public/                      # Archivos estáticos (opcional)
+├── 📁 data/                        # Datos históricos (opcional)
+├── 📁 logs/                        # Archivos de log
+├── 📄 iq_routes_redis_patch.py     # ✅ Backend API Flask
+├── 📄 iq_client.py                 # ✅ Cliente IQ Option  
+├── 📄 mt5_server.py                # ✅ Servidor dashboard
+├── 📄 .env                         # ✅ Variables de entorno
+├── 📄 requirements.txt             # ✅ Dependencias Python
+├── 📄 docker-compose.yml           # ✅ Redis Docker
+├── 📄 start_iq_system_complete.bat # ✅ Script de inicio
+├── 📄 test_symbols.py              # 🧪 Test símbolos
+├── 📄 test_complete_system.py      # 🧪 Test completo
+├── 📄 SISTEMA_IQ_COMPLETO.md       # 📚 Documentación
+└── 📄 README.md                    # 📚 Descripción
+                </pre>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔗 URLs de Acceso</h2>
+            
+            <table class="ports-table">
+                <thead>
+                    <tr>
+                        <th>Servicio</th>
+                        <th>URL</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Dashboard Principal</strong></td>
+                        <td><a href="http://localhost:5001" target="_blank">http://localhost:5001</a></td>
+                        <td>Interfaz de trading completa</td>
+                    </tr>
+                    <tr>
+                        <td><strong>API Health Check</strong></td>
+                        <td><a href="http://localhost:5002/health" target="_blank">http://localhost:5002/health</a></td>
+                        <td>Estado del backend API</td>
+                    </tr>
+                    <tr>
+                        <td><strong>API Símbolos</strong></td>
+                        <td><a href="http://localhost:5002/api/iq/symbols" target="_blank">http://localhost:5002/api/iq/symbols</a></td>
+                        <td>Lista símbolos disponibles</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Redis Commander</strong></td>
+                        <td><a href="http://localhost:8081" target="_blank">http://localhost:8081</a></td>
+                        <td>Interfaz Redis (si está activo)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="success-box">
+            🎉 <strong>¡Sistema Listo!</strong> Tu instalación estará completa cuando todos los servicios respondan correctamente
+        </div>
+
+        <div class="section">
+            <h2>⚠️ Troubleshooting Común</h2>
+            
+            <div class="requirements">
+                <div class="requirement-item">
+                    <h5>🔌 Error de conexión IQ</h5>
+                    <p>Verificar credenciales en .env<br>
+                    Comprobar conexión a internet<br>
+                    IQ Option puede estar en mantenimiento</p>
+                </div>
+                
+                <div class="requirement-item">
+                    <h5>🗄️ Redis no conecta</h5>
+                    <p>Verificar Docker está corriendo<br>
+                    Puerto 6380 disponible<br>
+                    Firewall no bloquea conexión</p>
+                </div>
+                
+                <div class="requirement-item">
+                    <h5>📊 No hay símbolos</h5>
+                    <p>Esperar que cliente IQ se conecte<br>
+                    Verificar mercado está abierto<br>
+                    Revisar logs del cliente IQ</p>
+                </div>
+                
+                <div class="requirement-item">
+                    <h5>🌐 Dashboard no carga</h5>
+                    <p>Verificar puerto 5001 libre<br>
+                    Comprobar mt5_server.py corriendo<br>
+                    Revisar archivos en templates/</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

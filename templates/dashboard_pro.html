@@ -1,0 +1,952 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>STC Trading • IQ Option • Dashboard Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f172a; --panel: #0b1222; --text: #c3cbdf; --muted: #94a3b8;
+      --ok: #10b981; --warn: #f59e0b; --err: #ef4444; --line: #334155;
+      --buy: #10b981; --sell: #ef4444; --primary: #2563eb;
+    }
+    html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial; }
+    .app { display: grid; grid-template-columns: 1fr 380px; grid-template-rows: auto 1fr; gap: 12px; height: 100%; padding: 12px; box-sizing: border-box; }
+    header { grid-column: 1 / span 2; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    header h1 { font-size: 16px; font-weight: 600; margin: 0 8px 0 0; }
+    input[type="text"], input[type="password"], select, input[type="number"] { background: #0b1222; color: var(--text); border: 1px solid var(--line); padding: 6px 8px; border-radius: 6px; }
+    button { background: #1f2937; color: var(--text); border: 1px solid var(--line); padding: 6px 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+    button.primary { background: var(--primary); border-color: #1d4ed8; }
+    button.buy { background: var(--buy); border-color: #064e3b; color: white; font-weight: 600; }
+    button.sell { background: var(--sell); border-color: #7f1d1d; color: white; font-weight: 600; }
+    button:hover { opacity: 0.9; transform: translateY(-1px); }
+    button:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+    .status { padding: 3px 8px; border-radius: 99px; font-size: 12px; }
+    .status.ok { background: rgba(16,185,129,.15); color: var(--ok); border: 1px solid rgba(16,185,129,.35); }
+    .status.warn { background: rgba(245,158,11,.15); color: var(--warn); border: 1px solid rgba(245,158,11,.35); }
+    .status.err { background: rgba(239,68,68,.15); color: var(--err); border: 1px solid rgba(239,68,68,.35); }
+
+    .chart-wrap { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; position: relative; }
+    #chartContainer { width: 100%; height: calc(100vh - 160px); }
+    aside { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+    .row { display: grid; grid-template-columns: 120px 1fr; gap: 8px; align-items: center; }
+    .row .v { text-align: right; font-variant-numeric: tabular-nums; }
+    .box { background: #0c1528; border: 1px solid var(--line); padding: 8px; border-radius: 8px; }
+    .muted { color: var(--muted); }
+    .flex { display: flex; gap: 8px; align-items: center; }
+    .right { justify-content: flex-end; }
+    .sep { height: 1px; background: var(--line); margin: 6px 0; }
+    .small { font-size: 12px; }
+    .bold { font-weight: 600; }
+
+    .sig-list { display: flex; flex-direction: column; gap: 6px; max-height: 240px; overflow-y: auto; }
+    .sig { display: grid; grid-template-columns: 56px 1fr; gap: 8px; align-items: center; padding: 6px; border: 1px solid var(--line); border-radius: 6px; }
+    .sig .tag { font-weight: 700; text-align: center; padding: 2px 6px; border-radius: 4px; color: #fff; }
+    .sig.buy .tag { background: var(--buy); }
+    .sig.sell .tag { background: var(--sell); }
+    .sig .info { font-variant-numeric: tabular-nums; }
+
+    .loading-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex; justify-content: center; align-items: center;
+      z-index: 1000;
+    }
+    .loading-spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .alerts { position: fixed; top: 20px; right: 20px; z-index: 2000; max-width: 350px; }
+    .alert { padding: 8px 12px; margin: 4px 0; border-radius: 6px; backdrop-filter: blur(10px); border-left: 4px solid; animation: slideIn 0.3s ease; font-size: 13px; }
+    .alert-success { background: rgba(16, 185, 129, 0.15); border-color: var(--ok); color: var(--ok); }
+    .alert-danger { background: rgba(239, 68, 68, 0.15); border-color: var(--err); color: var(--err); }
+    .alert-info { background: rgba(37, 99, 235, 0.15); border-color: var(--primary); color: var(--primary); }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    .trading-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .trading-input { display: grid; grid-template-columns: 80px 1fr; gap: 4px; align-items: center; margin: 4px 0; }
+    .balance-display { background: linear-gradient(135deg, #0f4c75, #3282b8); padding: 8px; border-radius: 6px; text-align: center; }
+    .balance-amount { font-size: 18px; font-weight: 700; color: white; }
+    .balance-type { font-size: 11px; color: rgba(255,255,255,0.8); }
+
+    .chart-fallback {
+      height: 400px; display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.3); border: 2px dashed var(--line); border-radius: 10px;
+      text-align: center; padding: 20px;
+    }
+    .price-display {
+      margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1);
+      border-radius: 8px; font-family: monospace; font-size: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .app { grid-template-columns: 1fr; }
+      aside { order: -1; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+  <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <div id="alertsContainer" class="alerts"></div>
+
+  <div class="app">
+    <header>
+      <h1>📊 STC Trading • IQ Option Pro</h1>
+      <span id="connStatus" class="status warn">Iniciando...</span>
+      <span id="dataStatus" class="status warn">Sin datos</span>
+      <div style="flex:1"></div>
+
+      <label class="muted small">API:</label>
+      <select id="apiSource">
+        <option value="http://localhost:5002" selected>Puerto 5002 (API)</option>
+        <option value="http://localhost:5001">Puerto 5001 (Dashboard)</option>
+      </select>
+
+      <button id="btnConnect" class="primary">Conectar</button>
+      <button id="btnDemo">Demo</button>
+    </header>
+
+    <div class="chart-wrap">
+      <div id="chartContainer"></div>
+      <div class="small muted" style="padding:8px 10px; background: rgba(0,0,0,0.5);">
+        💰 <b id="symbolLabel">-</b> • 📊 <b id="countLabel">0</b> velas • ⏰ <b id="timeLabel">-</b> • 🎯 BID: <b id="currentPrice">-</b>
+      </div>
+    </div>
+
+    <aside>
+      <!-- Balance e Info -->
+      <div class="box">
+        <div class="balance-display">
+          <div class="balance-amount" id="balanceAmount">$0.00</div>
+          <div class="balance-type" id="balanceType">PRACTICE</div>
+        </div>
+        <div class="sep"></div>
+        <div class="row"><div>Símbolo</div><div id="symBox" class="v bold">-</div></div>
+        <div class="row"><div>Spread</div><div id="spreadLabel" class="v">-</div></div>
+        <div class="row"><div>Actualizado</div><div id="updatedLabel" class="v small">-</div></div>
+      </div>
+
+      <!-- Conexión IQ -->
+      <div class="box">
+        <div class="flex" style="justify-content:space-between;">
+          <strong>🔗 Conexión IQ</strong>
+          <span id="iqStatus" class="small status warn">Desconectado</span>
+        </div>
+        <div class="sep"></div>
+        
+        <div style="display: grid; gap: 4px;">
+          <input id="iqEmail" type="email" placeholder="Email IQ Option" autocomplete="username" />
+          <input id="iqPassword" type="password" placeholder="Contraseña" autocomplete="current-password" />
+          
+          <div class="flex" style="gap: 4px;">
+            <select id="iqBalanceType" style="flex: 1;">
+              <option value="PRACTICE">PRACTICE</option>
+              <option value="REAL">REAL</option>
+            </select>
+            <button id="btnIqLogin" class="primary">Conectar</button>
+          </div>
+        </div>
+        
+        <div id="iqSessionInfo" class="small muted"></div>
+      </div>
+
+      <!-- Trading Panel -->
+      <div class="box">
+        <div class="flex" style="justify-content:space-between;">
+          <strong>⚡ Trading Rápido</strong>
+          <span class="small muted">Binario</span>
+        </div>
+        <div class="sep"></div>
+
+        <div class="trading-input">
+          <label class="small">Símbolo:</label>
+          <select id="symbolSelect" style="font-size: 11px;">
+            <option value="EURUSD-OTC">EURUSD-OTC</option>
+            <option value="GBPUSD-OTC">GBPUSD-OTC</option>
+            <option value="USDJPY-OTC">USDJPY-OTC</option>
+            <option value="EURJPY-OTC">EURJPY-OTC</option>
+          </select>
+        </div>
+
+        <div class="trading-input">
+          <label class="small">Monto:</label>
+          <input id="tradeAmount" type="number" value="1" min="1" max="1000" step="1" />
+        </div>
+
+        <div class="trading-input">
+          <label class="small">Tiempo:</label>
+          <select id="tradeDuration">
+            <option value="1">1 min</option>
+            <option value="5">5 min</option>
+            <option value="15">15 min</option>
+          </select>
+        </div>
+
+        <div class="trading-controls">
+          <button id="btnCallTrade" class="buy">📈 CALL</button>
+          <button id="btnPutTrade" class="sell">📉 PUT</button>
+        </div>
+
+        <div id="tradeStatus" class="small muted" style="margin-top: 8px; text-align: center;"></div>
+      </div>
+
+      <!-- Estadísticas Rápidas -->
+      <div class="box">
+        <strong>📈 Estadísticas</strong>
+        <div class="sep"></div>
+        <div class="row"><div>Operaciones</div><div id="totalTrades" class="v">0</div></div>
+        <div class="row"><div>Éxito</div><div id="winRate" class="v">0%</div></div>
+        <div class="row"><div>Ganancia</div><div id="dailyProfit" class="v">$0</div></div>
+      </div>
+
+      <!-- Estado del Sistema -->
+      <div class="box">
+        <strong>🔧 Estado Sistema</strong>
+        <div class="sep"></div>
+        <div class="row"><div>API Backend</div><div id="apiStatus" class="v small">-</div></div>
+        <div class="row"><div>Cliente IQ</div><div id="iqClientStatus" class="v small">-</div></div>
+        <div class="row"><div>Velas M5</div><div id="candlesStatus" class="v small">-</div></div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    // ====== Configuración Global ======
+    const CONFIG = {
+  API_BASE_URL: 'http://localhost:5002',
+      REFRESH_INTERVAL: 2000,
+      CHART_UPDATE_INTERVAL: 5000,
+      MAX_CANDLES: 100,
+      CURRENT_SYMBOL: 'EURUSD-OTC'
+    };
+
+    // ====== Estado Global ======
+    let state = {
+      chart: null,
+      candleSeries: null,
+      currentBid: null,
+      isConnected: false,
+      chartsAvailable: false,
+      refreshTimer: null,
+      stats: { totalTrades: 0, winRate: 0, dailyProfit: 0 }
+    };
+
+    // ====== Sistema de Alertas ======
+    class AlertManager {
+      static show(message, type = 'info', duration = 5000) {
+        const container = document.getElementById('alertsContainer');
+        const alertId = 'alert_' + Date.now();
+        
+        const alert = document.createElement('div');
+        alert.id = alertId;
+        alert.className = `alert alert-${type}`;
+        alert.innerHTML = `${message} <span style="float:right;cursor:pointer;" onclick="AlertManager.close('${alertId}')">&times;</span>`;
+        
+        container.appendChild(alert);
+        
+        if (duration > 0) {
+          setTimeout(() => AlertManager.close(alertId), duration);
+        }
+        
+        return alertId;
+      }
+
+      static close(alertId) {
+        const alert = document.getElementById(alertId);
+        if (alert) alert.remove();
+      }
+
+      static success(msg) { return this.show(msg, 'success'); }
+      static error(msg) { return this.show(msg, 'danger', 7000); }
+      static info(msg) { return this.show(msg, 'info'); }
+    }
+
+    // ====== Gestor de Gráficos Mejorado ======
+    class ChartManager {
+      constructor() {
+        this.chart = null;
+        this.candleSeries = null;
+        this.bidLine = null;
+        this.available = false;
+        this.init();
+      }
+
+      init() {
+        try {
+          const container = document.getElementById('chartContainer');
+          
+          // Verificar disponibilidad de la librería
+          if (typeof LightweightCharts === 'undefined' || !LightweightCharts.createChart) {
+            throw new Error('LightweightCharts no disponible');
+          }
+
+          // Crear gráfico
+          this.chart = LightweightCharts.createChart(container, {
+            layout: {
+              textColor: '#C3CBDF',
+              background: { type: 'solid', color: '#0f172a' }
+            },
+            rightPriceScale: { borderColor: '#334155' },
+            timeScale: {
+              borderColor: '#334155',
+              timeVisible: true,
+              secondsVisible: false,
+              rightOffset: 2,
+              barSpacing: 12
+            },
+            grid: {
+              vertLines: { color: 'rgba(148,163,184,0.1)' },
+              horzLines: { color: 'rgba(148,163,184,0.1)' }
+            }
+          });
+
+          // Verificar que addCandlestickSeries existe
+          if (!this.chart.addCandlestickSeries) {
+            throw new Error('addCandlestickSeries no es una función');
+          }
+
+          // Crear serie de velas
+          this.candleSeries = this.chart.addCandlestickSeries({
+            upColor: '#10b981',
+            downColor: '#ef4444',
+            borderDownColor: '#ef4444',
+            borderUpColor: '#10b981',
+            wickDownColor: '#ef4444',
+            wickUpColor: '#10b981',
+            priceFormat: { type: 'price', precision: 5, minMove: 0.00001 }
+          });
+
+          // Resize automático
+          window.addEventListener('resize', () => {
+            if (this.chart) {
+              const rect = container.getBoundingClientRect();
+              this.chart.applyOptions({
+                width: Math.floor(rect.width),
+                height: Math.floor(rect.height)
+              });
+            }
+          });
+
+          this.available = true;
+          console.log('✅ Gráfico inicializado correctamente');
+          AlertManager.success('📊 Gráfico inicializado');
+
+        } catch (error) {
+          console.error('❌ Error inicializando gráfico:', error.message);
+          this.available = false;
+          this.showFallback();
+          AlertManager.error('❌ Error inicializando gráfico: ' + error.message);
+        }
+      }
+
+      showFallback() {
+        const container = document.getElementById('chartContainer');
+        container.innerHTML = `
+          <div class="chart-fallback">
+            <div>
+              <div style="font-size: 48px; margin-bottom: 15px;">📊</div>
+              <h3>Gráfico No Disponible</h3>
+              <p>Los gráficos están temporalmente deshabilitados</p>
+              <p>El trading funciona normalmente</p>
+              <div id="priceDisplay" class="price-display">
+                Esperando datos de precios...
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      updateCandles(candles) {
+        if (!this.available) {
+          this.updateFallbackDisplay(candles);
+          return;
+        }
+
+        if (!this.candleSeries || !candles || candles.length === 0) return;
+
+        try {
+          // Formatear velas para TradingView
+          const formatted = candles
+            .map(c => ({
+              time: Math.floor((c.time || c.unix_time || Date.now()/1000)),
+              open: parseFloat(c.open || 0),
+              high: parseFloat(c.high || 0),
+              low: parseFloat(c.low || 0),
+              close: parseFloat(c.close || 0)
+            }))
+            .filter(c => c.open > 0 && c.high > 0 && c.low > 0 && c.close > 0)
+            .sort((a, b) => a.time - b.time);
+
+          if (formatted.length === 0) return;
+
+          this.candleSeries.setData(formatted);
+          
+          // Actualizar línea BID
+          const lastPrice = formatted[formatted.length - 1].close;
+          this.updateBidLine(lastPrice);
+          
+          // Scroll al final
+          this.chart.timeScale().scrollToPosition(0, true);
+
+        } catch (error) {
+          console.error('❌ Error actualizando velas:', error);
+        }
+      }
+
+      updateFallbackDisplay(candles) {
+        const display = document.getElementById('priceDisplay');
+        if (!display || !candles || candles.length === 0) return;
+
+        const last = candles[candles.length - 1];
+        const price = last.close || last.open || 0;
+        const change = price > (last.open || price) ? '📈' : '📉';
+        
+        display.innerHTML = `
+          ${change} <strong>${price.toFixed(5)}</strong><br>
+          <small>Alto: ${(last.high || price).toFixed(5)} | Bajo: ${(last.low || price).toFixed(5)}</small>
+        `;
+        display.style.color = change === '📈' ? '#10b981' : '#ef4444';
+      }
+
+      updateBidLine(price) {
+        if (!this.available || !price) return;
+
+        try {
+          // Remover línea anterior
+          if (this.bidLine) {
+            this.candleSeries.removePriceLine(this.bidLine);
+          }
+
+          // Crear nueva línea BID
+          this.bidLine = this.candleSeries.createPriceLine({
+            price: price,
+            color: '#e91e63',
+            lineWidth: 2,
+            lineStyle: 0,
+            axisLabelVisible: true,
+            title: `BID ${price.toFixed(5)}`
+          });
+
+        } catch (error) {
+          console.error('❌ Error actualizando línea BID:', error);
+        }
+      }
+    }
+
+    // ====== API Manager ======
+    class APIManager {
+      static getBaseUrl() {
+        return document.getElementById('apiSource').value.trim();
+      }
+
+      static async request(endpoint, options = {}) {
+        const url = `${this.getBaseUrl()}${endpoint}`;
+        
+        try {
+          const response = await fetch(url, {
+            headers: {
+              'Content-Type': 'application/json',
+              ...options.headers
+            },
+            ...options
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          return await response.json();
+
+        } catch (error) {
+          console.error(`❌ API Error ${endpoint}:`, error.message);
+          throw error;
+        }
+      }
+
+      static async getBalance() {
+        try {
+          const data = await this.request('/api/iq/balance');
+          return data;
+        } catch (error) {
+          console.warn('⚠️ Balance no disponible:', error.message);
+          return null;
+        }
+      }
+
+      static async getCandles(symbol) {
+        try {
+          const data = await this.request(`/api/iq/candles?symbol=${encodeURIComponent(symbol)}&timeframe=M5&limit=${CONFIG.MAX_CANDLES}`);
+          return Array.isArray(data) ? data : [];
+        } catch (error) {
+          console.warn('⚠️ Velas no disponibles:', error.message);
+          return [];
+        }
+      }
+
+      static async placeTrade(symbol, direction, amount, duration) {
+        try {
+          const data = await this.request('/api/iq/trade', {
+            method: 'POST',
+            body: JSON.stringify({
+              symbol,
+              direction: direction.toLowerCase(),
+              amount,
+              expiration: duration
+            })
+          });
+          return data;
+        } catch (error) {
+          throw new Error(`Error ejecutando ${direction}: ${error.message}`);
+        }
+      }
+
+      static async checkHealth() {
+        try {
+          await this.request('/health');
+          return true;
+        } catch (error) {
+          return false;
+        }
+      }
+    }
+
+    // ====== Funciones Principales ======
+    async function initApp() {
+      console.log('🚀 Iniciando STC Trading Dashboard...');
+      
+      try {
+        // Mostrar loading
+        showLoading(true);
+        
+        // Inicializar gráfico
+        state.chart = new ChartManager();
+        
+        // Verificar conexión
+        await checkConnection();
+        
+        // Cargar datos iniciales
+        await loadInitialData();
+        
+        // Iniciar timers
+        startAutoUpdate();
+        
+        // Configurar eventos
+        setupEventHandlers();
+        
+        // Ocultar loading
+        showLoading(false);
+        
+        AlertManager.success('✅ Dashboard iniciado correctamente');
+        console.log('✅ Dashboard inicializado');
+
+      } catch (error) {
+        console.error('❌ Error inicializando:', error);
+        AlertManager.error('❌ Error inicializando: ' + error.message);
+        showLoading(false);
+      }
+    }
+
+    async function checkConnection() {
+      try {
+        const isHealthy = await APIManager.checkHealth();
+        
+        if (isHealthy) {
+          document.getElementById('connStatus').textContent = 'Conectado';
+          document.getElementById('connStatus').className = 'status ok';
+          document.getElementById('apiStatus').textContent = 'OK';
+          state.isConnected = true;
+        } else {
+          throw new Error('API no responde');
+        }
+
+      } catch (error) {
+        document.getElementById('connStatus').textContent = 'Error';
+        document.getElementById('connStatus').className = 'status err';
+        document.getElementById('apiStatus').textContent = 'Error';
+        state.isConnected = false;
+        throw error;
+      }
+    }
+
+    async function loadInitialData() {
+      const symbol = document.getElementById('symbolSelect').value;
+      CONFIG.CURRENT_SYMBOL = symbol;
+      
+      // Actualizar símbolo en UI
+      document.getElementById('symBox').textContent = symbol;
+      document.getElementById('symbolLabel').textContent = symbol;
+      
+      // Cargar velas
+      await loadCandles(symbol);
+      
+      // Cargar balance
+      await loadBalance();
+    }
+
+    async function loadCandles(symbol) {
+      try {
+        console.log(`📊 Cargando velas para ${symbol}...`);
+        
+        const candles = await APIManager.getCandles(symbol);
+        
+        if (candles.length > 0) {
+          state.chart.updateCandles(candles);
+          
+          // Actualizar UI
+          document.getElementById('countLabel').textContent = candles.length;
+          document.getElementById('candlesStatus').textContent = `${candles.length} velas`;
+          
+          const lastCandle = candles[candles.length - 1];
+          const lastPrice = lastCandle.close || lastCandle.open || 0;
+          
+          if (lastPrice > 0) {
+            state.currentBid = lastPrice;
+            document.getElementById('currentPrice').textContent = lastPrice.toFixed(5);
+            document.getElementById('timeLabel').textContent = new Date().toLocaleTimeString();
+          }
+          
+          document.getElementById('dataStatus').textContent = 'Velas OK';
+          document.getElementById('dataStatus').className = 'status ok';
+          
+        } else {
+          document.getElementById('dataStatus').textContent = 'Sin velas';
+          document.getElementById('dataStatus').className = 'status warn';
+          document.getElementById('candlesStatus').textContent = 'Sin datos';
+        }
+
+      } catch (error) {
+        console.error('❌ Error cargando velas:', error);
+        document.getElementById('dataStatus').textContent = 'Error velas';
+        document.getElementById('dataStatus').className = 'status err';
+        document.getElementById('candlesStatus').textContent = 'Error';
+      }
+    }
+
+    async function loadBalance() {
+      try {
+        const balanceData = await APIManager.getBalance();
+        
+        if (balanceData && typeof balanceData.balance === 'number') {
+          const amount = balanceData.balance;
+          const type = balanceData.type || 'PRACTICE';
+          
+          document.getElementById('balanceAmount').textContent = `$${amount.toFixed(2)}`;
+          document.getElementById('balanceType').textContent = type;
+          
+          console.log(`💰 Balance: $${amount.toFixed(2)} (${type})`);
+        } else {
+          document.getElementById('balanceAmount').textContent = '$-.--';
+          document.getElementById('balanceType').textContent = 'Sin conexión';
+        }
+
+      } catch (error) {
+        console.warn('⚠️ Error obteniendo balance:', error.message);
+        document.getElementById('balanceAmount').textContent = '$-.--';
+        document.getElementById('balanceType').textContent = 'Error';
+      }
+    }
+
+    async function executeTrade(direction) {
+      if (!state.isConnected) {
+        AlertManager.error('❌ No hay conexión con la API');
+        return;
+      }
+
+      const symbol = document.getElementById('symbolSelect').value;
+      const amount = parseFloat(document.getElementById('tradeAmount').value);
+      const duration = parseInt(document.getElementById('tradeDuration').value);
+
+      if (!amount || amount <= 0) {
+        AlertManager.error('❌ Monto inválido');
+        return;
+      }
+
+      try {
+        document.getElementById('tradeStatus').textContent = `⏳ Ejecutando ${direction}...`;
+        
+        const result = await APIManager.placeTrade(symbol, direction, amount, duration);
+        
+        if (result.success) {
+          AlertManager.success(`✅ ${direction} ejecutado - ID: ${result.trade_id}`);
+          document.getElementById('tradeStatus').textContent = `✅ ${direction} - ID: ${result.trade_id}`;
+          
+          // Actualizar estadísticas
+          state.stats.totalTrades++;
+          document.getElementById('totalTrades').textContent = state.stats.totalTrades;
+          
+          // Recargar balance
+          setTimeout(loadBalance, 2000);
+          
+        } else {
+          AlertManager.error(`❌ Error: ${result.message || 'Orden falló'}`);
+          document.getElementById('tradeStatus').textContent = `❌ Error: ${result.message}`;
+        }
+
+      } catch (error) {
+        console.error('❌ Trade Error:', error);
+        AlertManager.error(error.message);
+        document.getElementById('tradeStatus').textContent = `❌ ${error.message}`;
+      }
+    }
+
+    function startAutoUpdate() {
+      // Limpiar timer existente
+      if (state.refreshTimer) {
+        clearInterval(state.refreshTimer);
+      }
+
+      // Timer principal
+      state.refreshTimer = setInterval(async () => {
+        if (state.isConnected) {
+          const symbol = document.getElementById('symbolSelect').value;
+          await loadCandles(symbol);
+          
+          // Actualizar timestamp
+          document.getElementById('updatedLabel').textContent = new Date().toLocaleTimeString();
+        }
+      }, CONFIG.REFRESH_INTERVAL);
+
+      // Timer para balance (menos frecuente)
+      setInterval(async () => {
+        if (state.isConnected) {
+          await loadBalance();
+        }
+      }, 10000);
+
+      console.log('🔄 Auto-update iniciado');
+    }
+
+    function setupEventHandlers() {
+      // Botones de trading
+      document.getElementById('btnCallTrade').addEventListener('click', () => executeTrade('CALL'));
+      document.getElementById('btnPutTrade').addEventListener('click', () => executeTrade('PUT'));
+      
+      // Cambio de símbolo
+      document.getElementById('symbolSelect').addEventListener('change', async (e) => {
+        const newSymbol = e.target.value;
+        CONFIG.CURRENT_SYMBOL = newSymbol;
+        document.getElementById('symBox').textContent = newSymbol;
+        document.getElementById('symbolLabel').textContent = newSymbol;
+        await loadCandles(newSymbol);
+        AlertManager.info(`📊 Símbolo cambiado a ${newSymbol}`);
+      });
+      
+      // Conexión
+     // ====== Event handlers ======
+document.getElementById('btnConnect').addEventListener('click', async () => {
+  CONFIG.API_BASE_URL = document.getElementById('apiSource').value;
+  await loginIQ(); // login real
+});
+
+document.getElementById('btnIqLogin').addEventListener('click', async () => {
+  await loginIQ();
+});
+      
+      // Demo
+      document.getElementById('btnDemo').addEventListener('click', () => {
+        const now = Math.floor(Date.now() / 1000);
+        const demoCandles = [
+          { time: now - 900, open: 1.10000, high: 1.10150, low: 1.09850, close: 1.10080 },
+          { time: now - 600, open: 1.10080, high: 1.10200, low: 1.10000, close: 1.10120 },
+          { time: now - 300, open: 1.10120, high: 1.10450, low: 1.10090, close: 1.10400 },
+          { time: now, open: 1.10400, high: 1.10550, low: 1.10350, close: 1.10500 }
+        ];
+        
+        state.chart.updateCandles(demoCandles);
+        state.currentBid = 1.10500;
+        
+        document.getElementById('connStatus').textContent = 'Demo';
+        document.getElementById('connStatus').className = 'status ok';
+        document.getElementById('dataStatus').textContent = 'Demo OK';
+        document.getElementById('dataStatus').className = 'status ok';
+        document.getElementById('currentPrice').textContent = '1.10500';
+        document.getElementById('countLabel').textContent = '4';
+        document.getElementById('symBox').textContent = 'EURUSD-OTC';
+        
+        AlertManager.success('📊 Modo demo activado');
+      });
+
+      console.log('🎛️ Event handlers configurados');
+    }
+
+    function showLoading(show) {
+      document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+    }
+
+    // ====== Inicio Automático ======
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🌐 DOM cargado, iniciando aplicación...');
+      
+      // Esperar un poco para que las librerías se carguen
+      setTimeout(initApp, 300);
+    });
+
+    // Cleanup al cerrar
+    window.addEventListener('beforeunload', () => {
+      if (state.refreshTimer) {
+        clearInterval(state.refreshTimer);
+      }
+    });
+
+    console.log('📋 STC Trading Dashboard script cargado');
+  </script>
+  <!-- Contenedor del gráfico (ajusta estilos a tu diseño si ya tienes uno) -->
+<div id="chart" style="height: 420px; width: 100%;"></div>
+
+<!-- 1) Cargar LightweightCharts desde CDN (si no lo tienes ya en tu proyecto) -->
+<script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js" crossorigin="anonymous"></script>
+
+<!-- Cargar el script corregido -->
+<script src="/static/js/stc_chart_fix.js"></script>
+
+<!-- 3) Inicializar el gráfico con tu endpoint actual -->
+<!-- 3) Inicializar el gráfico con tu endpoint actual -->
+<script>
+// STCChartFix se inicializa automáticamente al cargar la página
+window.addEventListener('DOMContentLoaded', function () {
+    // Inicializar actualización automática de balance
+    updateRealBalance();
+    setInterval(updateRealBalance, 10000); // Cada 10 segundos
+});
+
+// Función para actualizar balance real
+function updateRealBalance() {
+    fetch('/api/iq/balance')
+        .then(response => response.json())
+        .then(data => {
+            if (data.balance !== undefined) {
+                // Actualizar balance en el dashboard
+                const balanceElement = document.querySelector('[data-balance]');
+                if (balanceElement) {
+                    balanceElement.textContent = `$${data.balance.toFixed(2)}`;
+                }
+                
+                // Actualizar tipo de cuenta
+                const accountTypeElement = document.querySelector('[data-account-type]');
+                if (accountTypeElement) {
+                    accountTypeElement.textContent = data.balance_type;
+                }
+            }
+        })
+        .catch(error => console.error('Error actualizando balance:', error));
+}
+
+// Función para enviar órdenes reales
+function sendRealOrder(direction) {
+    const amount = parseFloat(document.querySelector('[data-amount]')?.value || 1);
+    const duration = parseInt(document.querySelector('[data-duration]')?.value || 1);
+    
+    const orderData = {
+        symbol: symbol,
+        direction: direction,
+        amount: amount,
+        duration: duration
+    };
+    
+    console.log('Enviando orden real:', orderData);
+    
+    fetch('/api/iq/trade', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Respuesta orden:', data);
+        if (data.success) {
+            alert(`✅ Orden ${direction} enviada exitosamente!\nID: ${data.order_id}`);
+        } else {
+            alert(`❌ Error enviando orden: ${data.error}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Error de conexión');
+    });
+}
+
+// Conectar botones CALL/PUT con órdenes reales
+document.addEventListener('DOMContentLoaded', function() {
+    const callButton = document.querySelector('[data-call-button]');
+    const putButton = document.querySelector('[data-put-button]');
+    
+    if (callButton) {
+        callButton.addEventListener('click', () => sendRealOrder('CALL'));
+    }
+    
+    if (putButton) {
+        putButton.addEventListener('click', () => sendRealOrder('PUT'));
+    }
+});
+</script>
+
+<script>
+// Inicializar el gráfico cuando el DOM esté listo
+window.addEventListener('DOMContentLoaded', function () {
+    console.log('🚀 Iniciando STC Chart Manager...');
+    
+    // El gráfico ya se inicializa automáticamente con STCChartFix
+    // El gráfico ya se inicializa automáticamente con STCChartFix
+    console.log('✅ STC Chart Manager - usando STCChartFix automático');
+});
+
+
+async function loginIQ() {
+  const email = document.getElementById('iqEmail').value.trim();
+  const password = document.getElementById('iqPassword').value.trim();
+  const balanceType = document.getElementById('iqBalanceType').value;
+
+  if (!email || !password) {
+    AlertManager.error('❌ Email y contraseña son obligatorios');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${CONFIG.API_BASE_URL}/api/iq/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, balance_type: balanceType })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      AlertManager.success('✅ Conectado a IQ Option');
+      document.getElementById('iqStatus').textContent = 'Conectado';
+      document.getElementById('iqStatus').className = 'status ok';
+      await loadBalance();
+      await loadCandles(CONFIG.CURRENT_SYMBOL);
+    } else {
+      AlertManager.error(`❌ Error: ${data.message || 'Credenciales inválidas'}`);
+    }
+
+  } catch (error) {
+    AlertManager.error('❌ Error de conexión');
+    console.error(error);
+  }
+}
+</script>
+
+<!-- stc-candles-updater.js removido - usando STCChartFix automático -->
+
+<script>
+// Inicialización mejorada
+document.addEventListener('DOMContentLoaded', function() {
+    // STCChartFix ya se inicializa automáticamente
+    console.log('🚀 STC Trading System - gráficos automáticos activos');
+});
+</script>
+</body>
+</html>

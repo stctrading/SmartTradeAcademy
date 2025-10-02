@@ -1,0 +1,61 @@
+# ===============================================
+# STC Trading System - Dependencias Python
+# Sistema IQ Option Trading Automatizado
+# ===============================================
+
+# Framework Web
+Flask==2.3.3
+flask-cors==4.0.0
+Werkzeug==2.3.7
+
+# Base de datos y cache  
+redis==5.0.1
+
+# HTTP y requests
+httpx==0.25.0
+requests==2.31.0
+urllib3==2.0.7
+
+# IQ Option API
+iqoptionapi==0.5
+
+# WebSocket support
+websocket-client==1.6.4
+
+# Utilidades
+python-dotenv==1.0.0
+uuid
+
+# Fecha y tiempo
+pytz==2023.3
+
+# JSON y serialización
+jsonschema==4.19.1
+
+# Opcional - Para análisis avanzado (comentado para evitar problemas de compilación)
+# pandas==2.1.1
+# numpy==1.24.3
+
+# Desarrollo y testing (opcional - comentado para instalación básica)
+# pytest==7.4.2
+# pytest-flask==1.2.0
+
+# Logging avanzado (opcional - comentado para instalación básica)
+# colorlog==6.7.0
+
+# ===============================================
+# INSTALACIÓN:
+# 
+# 1. Crear entorno virtual:
+#    python -m venv .venv311
+#
+# 2. Activar entorno:
+#    Windows: .venv311\Scripts\activate  
+#    Linux/Mac: source .venv311/bin/activate
+#
+# 3. Instalar dependencias:
+#    pip install -r requirements.txt
+#
+# 4. Verificar instalación:
+#    pip list
+# ===============================================
